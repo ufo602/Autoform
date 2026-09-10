@@ -99,6 +99,22 @@ def read_root():
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>회의록 서비스 초기화 중...</h1>")
 
+@app.get("/static/style.css")
+def get_style_css():
+    css_path = os.path.join(static_dir, "style.css")
+    if os.path.exists(css_path):
+        with open(css_path, "r", encoding="utf-8") as f:
+            return Response(content=f.read(), media_type="text/css")
+    raise HTTPException(status_code=404, detail="CSS not found")
+
+@app.get("/static/app.js")
+def get_app_js():
+    js_path = os.path.join(static_dir, "app.js")
+    if os.path.exists(js_path):
+        with open(js_path, "r", encoding="utf-8") as f:
+            return Response(content=f.read(), media_type="application/javascript")
+    raise HTTPException(status_code=404, detail="JS not found")
+
 
 @app.post("/api/stt")
 async def process_audio_stt(
