@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.env
+venv/
+*.tmp
+테스트_회의록_완성본.hwpx
