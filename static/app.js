@@ -475,23 +475,18 @@ async function handleDownloadHwpx() {
     
     let cleanTitle = (data.title || '회의록').replace(/[\r\n\t\\/:*?"<>|]/g, '_').trim();
     if (!cleanTitle) cleanTitle = '회의록';
-    const downloadName = cleanTitle + '.hwpx';
+    const downloadName = cleanTitle.endsWith('.hwpx') ? cleanTitle : cleanTitle + '.hwpx';
 
     const a = document.createElement('a');
-    a.style.position = 'fixed';
-    a.style.top = '-9999px';
     a.href = downloadUrl;
-    a.setAttribute('download', downloadName);
+    a.download = downloadName;
     document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     
-    // Delay revoking the object URL to allow browser download manager to capture the filename and blob
     setTimeout(() => {
       window.URL.revokeObjectURL(downloadUrl);
-      if (a.parentNode) {
-        a.parentNode.removeChild(a);
-      }
-    }, 1000);
+    }, 2000);
 
     showToast(`'${downloadName}' 다운로드가 완료되었습니다!`, 'success');
   } catch (err) {

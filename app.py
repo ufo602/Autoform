@@ -354,9 +354,10 @@ async def export_hwpx(data: MinutesData):
         filename = filename.replace('\r', '').replace('\n', '').replace('"', '').strip()
         import urllib.parse
         encoded_filename = urllib.parse.quote(filename)
+        fallback_filename = "meeting_minutes.hwpx"
 
         headers = {
-            "Content-Disposition": f'attachment; filename="{encoded_filename}"; filename*=UTF-8\'\'{encoded_filename}',
+            "Content-Disposition": f"attachment; filename=\"{fallback_filename}\"; filename*=UTF-8''{encoded_filename}",
             "Content-Type": "application/hwp+zip",
             "Access-Control-Expose-Headers": "Content-Disposition"
         }
