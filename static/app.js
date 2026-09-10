@@ -95,7 +95,7 @@ function showToast(msg, type = 'info') {
   }, 3500);
 }
 
-function loadSettings() {
+async function loadSettings() {
   currentProvider = localStorage.getItem('ai_provider') || 'gemini';
   
   geminiApiKey.value = localStorage.getItem('gemini_api_key') || '';
@@ -109,6 +109,32 @@ function loadSettings() {
   openRouterApiKey.value = localStorage.getItem('openrouter_api_key') || '';
   openRouterModel.value = localStorage.getItem('openrouter_model') || 'google/gemini-2.5-flash';
   openRouterSttModel.value = localStorage.getItem('openrouter_stt_model') || 'openai/whisper-large-v3';
+
+  // Automatically fetch environment variables from server (.env or OS environment)
+  try {
+    const res = await fetch('/api/config');
+    if (res.ok) {
+      const cfg = await res.json();
+      
+      // If user hasn't set custom key in browser, auto-populate from environment
+      if (!geminiApiKey.value && cfg.gemini_api_key) {
+        geminiApiKey.value = cfg.gemini_api_key;
+        localStorage.setItem('gemini_api_key', cfg.gemini_api_key);
+      }
+      if (!openRouterApiKey.value && cfg.openrouter_api_key) {
+        openRouterApiKey.value = cfg.openrouter_api_key;
+        localStorage.setItem('openrouter_api_key', cfg.openrouter_api_key);
+      }
+      if (!localStorage.getItem('ai_provider') && cfg.default_provider) {
+        currentProvider = cfg.default_provider;
+      }
+      if (cfg.gemini_api_key || cfg.openrouter_api_key) {
+        console.log("환경변수에서 API 키를 자동으로 로드했습니다.");
+      }
+    }
+  } catch (err) {
+    console.warn("서버 환경변수 로드 실패:", err);
+  }
 
   updateProviderUI();
 }
