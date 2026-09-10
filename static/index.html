@@ -6,6 +6,9 @@
   <title>AI 회의록 자동 작성 & HWPX 양식 채우기</title>
   <meta name="description" content="음성 및 텍스트 회의 내용을 OpenRouter AI 모델로 분석하여 회의록 양식(HWPX)에 자동 주입하고 다운로드하는 서비스입니다.">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Nanum+Gothic:wght@400;700;800&family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
@@ -157,19 +160,22 @@
       </div>
     </section>
 
-    <!-- Right Column: Form Editor & Preview & HWPX Export -->
-    <section class="panel-card">
+    <!-- Right Column: Hancom Paper Viewer & Form Editor & HWPX Export -->
+    <section class="panel-card right-panel">
       <div class="card-header">
-        <h2 class="card-title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10 9 9 9 8 9"></polyline>
-          </svg>
-          회의록 양식 미리보기 & 편집
-        </h2>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <h2 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            한글(HWP) 문서 뷰어 & 편집
+          </h2>
+          <span class="hwpx-badge">HWPX Preview</span>
+        </div>
         <button class="btn btn-success" id="btnDownloadHwpx" disabled>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -180,67 +186,177 @@
         </button>
       </div>
 
-      <!-- Empty state placeholder -->
-      <div class="empty-state" id="emptyPreviewState">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></line>
-          <line x1="3" y1="9" x2="21" y2="9"></line>
-          <line x1="9" y1="21" x2="9" y2="9"></line>
-        </svg>
-        <p>왼쪽에서 회의 내용을 입력하거나 음성을 녹음한 후<br><strong style="color: var(--text-main);">[회의록 양식 자동 생성하기]</strong> 버튼을 눌러주세요.</p>
+      <!-- Hancom Formatting Toolbar -->
+      <div class="hwp-toolbar" id="hwpToolbar">
+        <div class="hwp-tool-group">
+          <label class="hwp-tool-label">글꼴</label>
+          <select id="docFontFamily" class="hwp-select">
+            <option value="'Nanum Myeongjo', serif" selected>함초롬바탕 / 나눔명조 (기본)</option>
+            <option value="'Gowun Batang', serif">고운바탕</option>
+            <option value="'Noto Serif KR', serif">본명조 (Noto Serif)</option>
+            <option value="'Nanum Gothic', sans-serif">함초롬돋움 / 나눔고딕</option>
+            <option value="'Noto Sans KR', sans-serif">본고딕 (Noto Sans)</option>
+            <option value="'Pretendard', sans-serif">프리텐다드 (Pretendard)</option>
+            <option value="Gulim, '굴림', sans-serif">굴림체</option>
+            <option value="Batang, '바탕', serif">바탕체</option>
+          </select>
+        </div>
+
+        <div class="hwp-tool-separator"></div>
+
+        <div class="hwp-tool-group">
+          <label class="hwp-tool-label">글자 크기</label>
+          <select id="docFontSize" class="hwp-select" style="width: 76px;">
+            <option value="9pt">9 pt</option>
+            <option value="10pt" selected>10 pt</option>
+            <option value="11pt">11 pt</option>
+            <option value="12pt">12 pt</option>
+            <option value="13pt">13 pt</option>
+          </select>
+        </div>
+
+        <div class="hwp-tool-separator"></div>
+
+        <div class="hwp-tool-group">
+          <label class="hwp-tool-label">줄간격</label>
+          <select id="docLineHeight" class="hwp-select" style="width: 82px;">
+            <option value="1.4">140%</option>
+            <option value="1.6" selected>160% (한글 표준)</option>
+            <option value="1.8">180%</option>
+            <option value="2.0">200%</option>
+          </select>
+        </div>
+
+        <div class="hwp-tool-separator"></div>
+
+        <div class="hwp-tool-group">
+          <label class="hwp-tool-label">문단 여백</label>
+          <select id="docParagraphGap" class="hwp-select" style="width: 86px;">
+            <option value="2px">좁게 (2px)</option>
+            <option value="6px" selected>보통 (6px)</option>
+            <option value="12px">넓게 (12px)</option>
+            <option value="18px">아주 넓게</option>
+          </select>
+        </div>
+
+        <div class="hwp-tool-separator"></div>
+
+        <div class="hwp-tool-group">
+          <label class="hwp-tool-label">종이 여백</label>
+          <select id="docPagePadding" class="hwp-select" style="width: 90px;">
+            <option value="30px 35px">좁게 (30mm)</option>
+            <option value="42px 48px" selected>표준 (40mm)</option>
+            <option value="56px 60px">넓게 (50mm)</option>
+          </select>
+        </div>
+
+        <button class="hwp-reset-btn" id="btnResetStyles" title="기본 스타일로 초기화">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+          </svg>
+          기본값
+        </button>
       </div>
 
-      <!-- Form Editor (Filled fields) -->
-      <div class="editor-container" id="editorContainer" style="display: none;">
-        <!-- 회의제목 -->
-        <div class="form-group">
-          <label class="form-label">회의제목 <span class="tag">Table 1 (0,0)</span></label>
-          <input type="text" id="fTitle" placeholder="회의 제목을 입력하세요">
+      <!-- Empty state placeholder -->
+      <div class="empty-state" id="emptyPreviewState">
+        <div class="empty-hancom-paper">
+          <div class="paper-fold"></div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+            <line x1="9" y1="21" x2="9" y2="9"></line>
+          </svg>
         </div>
+        <p>왼쪽에서 회의 내용을 입력하거나 음성을 녹음한 후<br><strong style="color: var(--text-main);">[회의록 양식 자동 생성하기]</strong> 버튼을 눌러주세요.<br><span style="font-size: 0.85rem; color: var(--text-dim);">한글(HWPX) 원본 양식 규격 그대로 실시간 렌더링됩니다.</span></p>
+      </div>
 
-        <!-- 일시 / 장소 -->
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">일시 <span class="tag">Table 1 (0,1)</span></label>
-            <input type="text" id="fDateTime" placeholder="2026년 MM월 DD일 HH:MM">
+      <!-- Hancom Realistic Viewer Container -->
+      <div class="hwp-viewer-workspace" id="editorContainer" style="display: none;">
+        <!-- A4 Realistic Paper Sheet -->
+        <div class="hwp-paper" id="hwpPaper">
+          <!-- Document Main Heading -->
+          <div class="hwp-doc-header">
+            <h1 class="hwp-doc-main-title">회 의 록</h1>
           </div>
-          <div class="form-group">
-            <label class="form-label">장소 <span class="tag">Table 1 (2,1)</span></label>
-            <input type="text" id="fPlace" placeholder="회의 장소">
+
+          <!-- Table 1: 기본 정보 테이블 (회의제목, 일시, 장소, 참석자, 주최자) -->
+          <table class="hwp-table hwp-table-info">
+            <colgroup>
+              <col style="width: 17%;">
+              <col style="width: 33%;">
+              <col style="width: 17%;">
+              <col style="width: 33%;">
+            </colgroup>
+            <tbody>
+              <tr>
+                <th class="hwp-th">회의제목</th>
+                <td class="hwp-td" colspan="3">
+                  <input type="text" id="fTitle" class="hwp-inline-input" placeholder="회의 제목을 입력하세요">
+                </td>
+              </tr>
+              <tr>
+                <th class="hwp-th">일 시</th>
+                <td class="hwp-td">
+                  <input type="text" id="fDateTime" class="hwp-inline-input" placeholder="2026년 MM월 DD일 HH:MM">
+                </td>
+                <th class="hwp-th">장 소</th>
+                <td class="hwp-td">
+                  <input type="text" id="fPlace" class="hwp-inline-input" placeholder="회의 장소">
+                </td>
+              </tr>
+              <tr>
+                <th class="hwp-th">참석자</th>
+                <td class="hwp-td" colspan="3">
+                  <input type="text" id="fAttendees" class="hwp-inline-input" placeholder="참석자 명단">
+                </td>
+              </tr>
+              <tr>
+                <th class="hwp-th">회의 주최자</th>
+                <td class="hwp-td" colspan="3">
+                  <input type="text" id="fHost" class="hwp-inline-input" placeholder="주최자 성명/직책">
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Table 2: 상세 내용 테이블 (안건, 논의 내용, 추후 일정) -->
+          <table class="hwp-table hwp-table-content">
+            <colgroup>
+              <col style="width: 17%;">
+              <col style="width: 83%;">
+            </colgroup>
+            <tbody>
+              <tr>
+                <th class="hwp-th">안 건</th>
+                <td class="hwp-td">
+                  <textarea id="fAgenda" class="hwp-inline-textarea" rows="3" placeholder="1. 안건 1&#10;2. 안건 2"></textarea>
+                </td>
+              </tr>
+              <tr>
+                <th class="hwp-th">
+                  논의 내용
+                  <div class="hwp-th-sub">(발화자) 형식</div>
+                </th>
+                <td class="hwp-td">
+                  <textarea id="fDiscussion" class="hwp-inline-textarea hwp-disc-area" rows="12" placeholder="(발화자1) 발언 내용&#10;(발화자2) 답변 및 논의 내용"></textarea>
+                </td>
+              </tr>
+              <tr>
+                <th class="hwp-th">추후 일정</th>
+                <td class="hwp-td">
+                  <textarea id="fSchedule" class="hwp-inline-textarea" rows="4" placeholder="- 추후 일정 및 액션 아이템"></textarea>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Hancom Document Footer / Page Indicator -->
+          <div class="hwp-doc-footer">
+            <span class="hwp-footer-stamp">공식 회의록 양식 (HWPX 규격 준수)</span>
+            <span class="hwp-page-number">- 1 -</span>
           </div>
-        </div>
-
-        <!-- 참석자 / 주최자 -->
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">참석자 <span class="tag">Table 1 (0,2)</span></label>
-            <input type="text" id="fAttendees" placeholder="참석자 명단">
-          </div>
-          <div class="form-group">
-            <label class="form-label">회의 주최자 <span class="tag">Table 1 (0,3)</span></label>
-            <input type="text" id="fHost" placeholder="주최자 성명/직책">
-          </div>
-        </div>
-
-        <!-- 안건 -->
-        <div class="form-group">
-          <label class="form-label">안건 <span class="tag">Table 2 (0,0)</span></label>
-          <textarea id="fAgenda" class="textarea-field" placeholder="1. 안건 1&#10;2. 안건 2"></textarea>
-        </div>
-
-        <!-- 논의 내용 (발화자 형식) -->
-        <div class="form-group">
-          <label class="form-label">
-            논의 내용 
-            <span class="tag" style="color: #38bdf8; font-weight: 700;">(발화자) 내용 필수 양식</span>
-          </label>
-          <textarea id="fDiscussion" class="textarea-field discussion-box" placeholder="(발화자1) 발언 내용&#10;(발화자2) 답변 및 논의 내용"></textarea>
-        </div>
-
-        <!-- 추후 일정 -->
-        <div class="form-group">
-          <label class="form-label">추후 일정 <span class="tag">Table 2 (0,2)</span></label>
-          <textarea id="fSchedule" class="textarea-field" placeholder="- 추후 일정 및 액션 아이템"></textarea>
         </div>
       </div>
     </section>

@@ -41,6 +41,15 @@ const emptyPreviewState = document.getElementById('emptyPreviewState');
 const editorContainer = document.getElementById('editorContainer');
 const btnDownloadHwpx = document.getElementById('btnDownloadHwpx');
 
+// Hancom Toolbar & Paper Elements
+const hwpPaper = document.getElementById('hwpPaper');
+const docFontFamily = document.getElementById('docFontFamily');
+const docFontSize = document.getElementById('docFontSize');
+const docLineHeight = document.getElementById('docLineHeight');
+const docParagraphGap = document.getElementById('docParagraphGap');
+const docPagePadding = document.getElementById('docPagePadding');
+const btnResetStyles = document.getElementById('btnResetStyles');
+
 // Form fields
 const fTitle = document.getElementById('fTitle');
 const fDateTime = document.getElementById('fDateTime');
@@ -75,6 +84,7 @@ const toast = document.getElementById('toast');
 document.addEventListener('DOMContentLoaded', () => {
   loadSettings();
   setupEventListeners();
+  applyDocumentStyles();
 });
 
 function showToast(msg, type = 'info') {
@@ -209,6 +219,70 @@ function setupEventListeners() {
 
   // Download HWPX
   btnDownloadHwpx.addEventListener('click', handleDownloadHwpx);
+
+  // Hancom Styling Toolbar Listeners
+  if (docFontFamily) docFontFamily.addEventListener('change', applyDocumentStyles);
+  if (docFontSize) docFontSize.addEventListener('change', applyDocumentStyles);
+  if (docLineHeight) docLineHeight.addEventListener('change', applyDocumentStyles);
+  if (docParagraphGap) docParagraphGap.addEventListener('change', applyDocumentStyles);
+  if (docPagePadding) docPagePadding.addEventListener('change', applyDocumentStyles);
+  if (btnResetStyles) btnResetStyles.addEventListener('click', resetDocumentStyles);
+
+  // Auto-expand inline textareas on user typing
+  [fAgenda, fDiscussion, fSchedule].forEach(textarea => {
+    if (textarea) {
+      textarea.addEventListener('input', () => autoResizeTextarea(textarea));
+    }
+  });
+}
+
+function applyDocumentStyles() {
+  if (!hwpPaper) return;
+
+  const font = docFontFamily ? docFontFamily.value : "'Nanum Myeongjo', serif";
+  const size = docFontSize ? docFontSize.value : "10pt";
+  const lineH = docLineHeight ? docLineHeight.value : "1.6";
+  const gap = docParagraphGap ? docParagraphGap.value : "6px";
+  const padding = docPagePadding ? docPagePadding.value : "42px 48px";
+
+  // Apply to paper container
+  hwpPaper.style.fontFamily = font;
+  hwpPaper.style.fontSize = size;
+  hwpPaper.style.lineHeight = lineH;
+  hwpPaper.style.padding = padding;
+
+  // Apply font and size to inputs/textareas
+  const inputs = hwpPaper.querySelectorAll('.hwp-inline-input, .hwp-inline-textarea');
+  inputs.forEach(el => {
+    el.style.fontFamily = font;
+    el.style.fontSize = size;
+    el.style.lineHeight = lineH;
+  });
+
+  // Apply paragraph gap
+  const textareas = hwpPaper.querySelectorAll('.hwp-inline-textarea');
+  textareas.forEach(el => {
+    el.style.marginBottom = gap;
+  });
+
+  // Re-adjust textarea sizes
+  textareas.forEach(autoResizeTextarea);
+}
+
+function resetDocumentStyles() {
+  if (docFontFamily) docFontFamily.value = "'Nanum Myeongjo', serif";
+  if (docFontSize) docFontSize.value = "10pt";
+  if (docLineHeight) docLineHeight.value = "1.6";
+  if (docParagraphGap) docParagraphGap.value = "6px";
+  if (docPagePadding) docPagePadding.value = "42px 48px";
+  applyDocumentStyles();
+  showToast("문서 서식이 기본값으로 초기화되었습니다.", "info");
+}
+
+function autoResizeTextarea(el) {
+  if (!el) return;
+  el.style.height = 'auto';
+  el.style.height = (el.scrollHeight + 4) + 'px';
 }
 
 function switchTab(mode) {
@@ -438,6 +512,10 @@ function populateForm(data) {
   emptyPreviewState.style.display = 'none';
   editorContainer.style.display = 'flex';
   btnDownloadHwpx.disabled = false;
+
+  // Apply chosen typography & page styles and resize multiline textareas
+  applyDocumentStyles();
+  [fAgenda, fDiscussion, fSchedule].forEach(autoResizeTextarea);
 }
 
 // Download Filled HWPX
