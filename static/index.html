@@ -390,10 +390,13 @@
     <!-- Gemini settings -->
     <div id="geminiSettingsSection">
       <div class="form-group">
-        <label class="form-label">Google Gemini API Key</label>
-        <input type="password" id="geminiApiKey" placeholder="AIzaSy...">
-        <p style="font-size: 0.78rem; color: var(--text-dim); margin-top: 4px;">
-          Google AI Studio에서 발급받은 Gemini API 키를 입력하세요. 브라우저에 안전하게 저장됩니다.
+        <label class="form-label">
+          Google Gemini API Key
+          <span id="geminiEnvBadge" style="display: none; font-size: 0.72rem; color: #34d399; font-weight: 600; background: rgba(16, 185, 129, 0.15); padding: 2px 6px; border-radius: 4px;">✔ Vercel 환경변수 연동됨</span>
+        </label>
+        <input type="password" id="geminiApiKey" placeholder="AIzaSy... (비워두면 Vercel 환경변수 기본 사용)">
+        <p style="font-size: 0.78rem; color: var(--text-dim); margin-top: 4px;" id="geminiKeyHelpText">
+          Google AI Studio에서 발급받은 Gemini API 키입니다. Vercel 환경변수에 등록되어 있으면 비워두셔도 자동 적용됩니다.
         </p>
       </div>
       <div class="form-group">
@@ -408,10 +411,13 @@
     <!-- OpenRouter settings -->
     <div id="openrouterSettingsSection" style="display: none;">
       <div class="form-group">
-        <label class="form-label">OpenRouter API Key</label>
-        <input type="password" id="openRouterApiKey" placeholder="sk-or-v1-...">
+        <label class="form-label">
+          OpenRouter API Key
+          <span id="openrouterEnvBadge" style="display: none; font-size: 0.72rem; color: #34d399; font-weight: 600; background: rgba(16, 185, 129, 0.15); padding: 2px 6px; border-radius: 4px;">✔ Vercel 환경변수 연동됨</span>
+        </label>
+        <input type="password" id="openRouterApiKey" placeholder="sk-or-v1-... (비워두면 Vercel 환경변수 기본 사용)">
         <p style="font-size: 0.78rem; color: var(--text-dim); margin-top: 4px;">
-          OpenRouter API 키입니다.
+          OpenRouter API 키입니다. Vercel 환경변수에 등록되어 있으면 비워두셔도 자동 적용됩니다.
         </p>
       </div>
       <div class="form-group">

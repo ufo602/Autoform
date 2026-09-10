@@ -26,17 +26,16 @@ TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "양식", "회의록 양
 @app.get("/api/config")
 async def get_server_config():
     """
-    서버 환경변수(.env 또는 OS 환경변수)에서 설정된 기본 API Key 및 모델 정보를 반환
-    클라이언트 초기 로딩 시 자동 입력용으로 사용됨
+    서버 환경변수(.env 또는 Vercel 환경변수)의 설정 유무만 반환 (보안을 위해 실제 Key 값은 절대 노출하지 않음)
     """
     gemini_key = os.getenv("GEMINI_API_KEY") or ""
     openrouter_key = os.getenv("OPENROUTER_API_KEY") or ""
     provider = "gemini" if gemini_key or not openrouter_key else "openrouter"
 
     return {
-        "gemini_api_key": gemini_key,
+        "has_gemini_key": bool(gemini_key),
+        "has_openrouter_key": bool(openrouter_key),
         "gemini_model": os.getenv("GEMINI_MODEL") or "gemini-3.6-flash",
-        "openrouter_api_key": openrouter_key,
         "openrouter_model": os.getenv("OPENROUTER_MODEL") or "google/gemini-2.5-flash",
         "openrouter_stt_model": os.getenv("OPENROUTER_STT_MODEL") or "openai/whisper-large-v3",
         "default_provider": provider

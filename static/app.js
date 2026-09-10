@@ -78,6 +78,12 @@ const openRouterApiKey = document.getElementById('openRouterApiKey');
 const openRouterModel = document.getElementById('openRouterModel');
 const openRouterSttModel = document.getElementById('openRouterSttModel');
 
+const geminiEnvBadge = document.getElementById('geminiEnvBadge');
+const openrouterEnvBadge = document.getElementById('openrouterEnvBadge');
+
+let serverHasGeminiKey = false;
+let serverHasOpenRouterKey = false;
+
 const toast = document.getElementById('toast');
 
 // --- Initialization ---
@@ -110,30 +116,27 @@ async function loadSettings() {
   openRouterModel.value = localStorage.getItem('openrouter_model') || 'google/gemini-2.5-flash';
   openRouterSttModel.value = localStorage.getItem('openrouter_stt_model') || 'openai/whisper-large-v3';
 
-  // Automatically fetch environment variables from server (.env or OS environment)
+  // Check server environment variables status
   try {
     const res = await fetch('/api/config');
     if (res.ok) {
       const cfg = await res.json();
-      
-      // If user hasn't set custom key in browser, auto-populate from environment
-      if (!geminiApiKey.value && cfg.gemini_api_key) {
-        geminiApiKey.value = cfg.gemini_api_key;
-        localStorage.setItem('gemini_api_key', cfg.gemini_api_key);
+      serverHasGeminiKey = !!cfg.has_gemini_key;
+      serverHasOpenRouterKey = !!cfg.has_openrouter_key;
+
+      if (serverHasGeminiKey && geminiEnvBadge) {
+        geminiEnvBadge.style.display = 'inline-block';
       }
-      if (!openRouterApiKey.value && cfg.openrouter_api_key) {
-        openRouterApiKey.value = cfg.openrouter_api_key;
-        localStorage.setItem('openrouter_api_key', cfg.openrouter_api_key);
+      if (serverHasOpenRouterKey && openrouterEnvBadge) {
+        openrouterEnvBadge.style.display = 'inline-block';
       }
+
       if (!localStorage.getItem('ai_provider') && cfg.default_provider) {
         currentProvider = cfg.default_provider;
       }
-      if (cfg.gemini_api_key || cfg.openrouter_api_key) {
-        console.log("환경변수에서 API 키를 자동으로 로드했습니다.");
-      }
     }
   } catch (err) {
-    console.warn("서버 환경변수 로드 실패:", err);
+    console.warn("서버 환경변수 상태 확인 실패:", err);
   }
 
   updateProviderUI();
@@ -419,7 +422,9 @@ async function handleGenerateMinutes() {
   const activeModel = provider === 'gemini' ? geminiMdl : openRouterMdl;
   const activeSttModel = provider === 'gemini' ? geminiMdl : openRouterSttMdl;
 
-  if (!apiKey) {
+  const hasKey = apiKey || (provider === 'gemini' ? serverHasGeminiKey : serverHasOpenRouterKey);
+
+  if (!hasKey) {
     showToast(`${provider === 'gemini' ? 'Gemini' : 'OpenRouter'} API Key가 등록되지 않았습니다. 우측 상단 [API 설정]을 클릭해 등록하세요.`, 'danger');
     settingsModal.classList.add('show');
     return;
